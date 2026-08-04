@@ -1,0 +1,45 @@
+# Environment and secrets
+.env
+.env.*
+!.env.example
+!*.env.example
+Docs/infs.env
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Local databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Node.js
+node_modules/
+dist/
+dist-ssr/
+.vite/
+coverage/
+*.local
+
+# Legacy dependency manifest previously kept above Frontend/
+/package.json
+/package-lock.json
+
+# Logs and temporary files
+*.log
+*.tmp
+*.bak
+andamento.txt
+
+# Editors and operating systems
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
