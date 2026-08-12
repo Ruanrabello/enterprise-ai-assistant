@@ -1,0 +1,3 @@
+CURRENT_USER_ID = 1
+DEFAULT_USER_NAME = "Usuário"
+DEFAULT_USER_EMAIL = "usuario@local.dev"

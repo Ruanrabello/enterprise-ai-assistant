@@ -1,20 +1,42 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
-from sqlalchemy.orm import relationship
-from sqlalchemy.sql import func
+from __future__ import annotations
+
+from datetime import datetime
+from typing import TYPE_CHECKING
+
+from sqlalchemy import DateTime, ForeignKey, String, func
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from database.database import Base
 
+if TYPE_CHECKING:
+  from database.models.Mensagem import Mensagem
+  from database.models.Usuario import Usuario
+
+
 class Conversa(Base):
-    __tablename__ = "conversas"
+  __tablename__ = "conversas"
 
-    id = Column(Integer, primary_key=True, index=True)
+  id: Mapped[int] = mapped_column(primary_key=True, index=True)
 
-    titulo = Column(String, nullable=False)
+  titulo: Mapped[str] = mapped_column(String, nullable=False)
 
-    usuario_id = Column(Integer, ForeignKey("usuarios.id"), nullable=False)   # usuarios = nome da tabela (__tablename__), id = coluna dessa tabel
+  usuario_id: Mapped[int] = mapped_column(
+    ForeignKey("usuarios.id"),
+    nullable=False,
+  )
 
-    usuario = relationship("Usuario", back_populates="conversas")
+  usuario: Mapped[Usuario] = relationship(
+    "Usuario",
+    back_populates="conversas",
+  )
 
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
+  created_at: Mapped[datetime] = mapped_column(
+    DateTime(timezone=True),
+    server_default=func.now(),
+  )
 
-    mensagens = relationship( "Mensagem", back_populates="conversa", cascade="all, delete-orphan")
+  mensagens: Mapped[list[Mensagem]] = relationship(
+    "Mensagem",
+    back_populates="conversa",
+    cascade="all, delete-orphan",
+  )

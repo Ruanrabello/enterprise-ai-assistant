@@ -1,119 +1,63 @@
-import { NavLink, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { NavLink, useLocation } from "react-router-dom";
 import api from "../../Services/api";
-import type { Conversa } from "../../types/conversa";
-
+import type { Conversation } from "../../types/chat";
 
 function ConversasRecentes() {
+  const [conversas, setConversas] = useState<Conversation[]>([]);
+  const location = useLocation();
 
-    const [conversas, setConversas] = useState<Conversa[]>([])
+  useEffect(() => {
+    let ativo = true;
 
-    const location = useLocation();
+    async function carregarConversas() {
+      try {
+        const response = await api.get<Conversation[]>("/chat/conversas");
 
-    useEffect(() => {
-
-        let ativo = true;
-
-        async function carregarConversas() {
-
-            try {
-                const response = await api.get("/chat/conversas");
-
-                if(ativo){
-                    setConversas(response.data);
-                }
-
-
-
-            }catch(error){
-                console.error(error);
-
-            }
-
+        if (ativo) {
+          setConversas(response.data);
         }
+      } catch (error) {
+        console.error(error);
+      }
+    }
 
-        carregarConversas();
-        return () => {
-            ativo = false;
-        };
+    void carregarConversas();
 
+    return () => {
+      ativo = false;
+    };
+  }, [location.pathname]);
 
-    }, [location.pathname]);
+  return (
+    <div className="flex flex-col rounded-xl border border-slate-800 bg-slate-900 p-4">
+      <h2 className="mb-4 text-sm font-semibold text-white">
+        Conversas recentes
+      </h2>
 
+      <div className="flex-1 space-y-1 overflow-y-auto pr-2">
+        {conversas.length === 0 && (
+          <p className="text-sm text-slate-500">
+            Nenhuma conversa criada ainda.
+          </p>
+        )}
 
+        {conversas.map((conversa) => (
+          <NavLink
+            key={conversa.id}
+            to={`/chat/${conversa.id}`}
+            className="flex items-center gap-2 rounded-md p-2 transition hover:bg-slate-800"
+          >
+            <div className="h-2 w-2 rounded-full bg-cyan-400" />
 
-    return(
-        <div className="
-            flex
-            flex-col
-            rounded-xl
-            border
-            border-slate-800
-            bg-slate-900
-            p-4
-        ">
-
-            <h2 className="
-                text-sm
-                font-semibold
-                text-white
-                mb-4
-            ">
-                Conversas Recentes
-            </h2>
-
-
-            <div className="
-                flex-1
-                overflow-y-auto
-                pr-2
-                space-y-1
-            ">
-
-                {conversas.map((conversa) => (
-
-                    <NavLink
-                        key={conversa.id}
-                        to={`/chat/${conversa.id}`}
-                        className="
-                            flex
-                            items-center
-                            gap-2
-                            rounded-md
-                            p-2
-                            hover:bg-slate-800
-                            cursor-pointer
-                            transition
-                        "
-                    >
-
-                        <div className="
-                            h-2
-                            w-2
-                            rounded-full
-                            bg-cyan-400
-                        ">
-                        </div>
-
-
-                        <p className="
-                            text-sm
-                            text-slate-300
-                            truncate
-                        ">
-                            {conversa.titulo}
-                        </p>
-
-
-                    </NavLink>
-
-                ))}
-
-            </div>
-
-        </div>
-    );
+            <p className="truncate text-sm text-slate-300">
+              {conversa.titulo}
+            </p>
+          </NavLink>
+        ))}
+      </div>
+    </div>
+  );
 }
-
 
 export default ConversasRecentes;

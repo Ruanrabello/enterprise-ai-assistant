@@ -1,38 +1,45 @@
-from sqlalchemy import Column, Integer, String, ForeignKey
-from sqlalchemy.orm import relationship
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+from sqlalchemy import ForeignKey, String
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from database.database import Base
+
+if TYPE_CHECKING:
+    from database.models.Usuario import Usuario
 
 
 class ConfiguracaoIA(Base):
 
     __tablename__ = "configuracoes_ia"
 
-    id = Column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
 
-    usuario_id = Column(
-        Integer,
+    usuario_id: Mapped[int] = mapped_column(
         ForeignKey("usuarios.id"),
         nullable=False
     )
 
-    provider = Column(
+    provider: Mapped[str] = mapped_column(
         String,
-        default="ollama"
+        default="ollama",
+        nullable=False
     )
 
-    modelo = Column(
+    modelo: Mapped[str] = mapped_column(
         String,
-        default="qwen3:8b"
+        default="qwen3:8b",
+        nullable=False
     )
 
-    api_key = Column(
+    api_key: Mapped[str | None] = mapped_column(
         String,
         nullable=True
     )
 
-
-    usuario = relationship(
+    usuario: Mapped[Usuario] = relationship(
         "Usuario",
         back_populates="configuracao_ia"
     )

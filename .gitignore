@@ -1,45 +1,52 @@
-# Environment and secrets
+# Environment variables and credentials
 .env
 .env.*
+*.env
 !.env.example
-!*.env.example
-Docs/infs.env
-
-# Python
-__pycache__/
-*.py[cod]
-.venv/
-venv/
-env/
-.pytest_cache/
-.mypy_cache/
-.ruff_cache/
+!.env.*.example
 
 # Local databases
 *.db
 *.sqlite
 *.sqlite3
+*.db-journal
+*.db-shm
+*.db-wal
 
-# Node.js
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+ENV/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+*.egg-info/
+build/
+
+# Node / Vite
 node_modules/
 dist/
-dist-ssr/
-.vite/
 coverage/
-*.local
-
-# Legacy dependency manifest previously kept above Frontend/
-/package.json
-/package-lock.json
+.vite/
+*.tsbuildinfo
 
 # Logs and temporary files
 *.log
 *.tmp
-*.bak
-andamento.txt
+*.temp
+*.swp
+*.swo
 
 # Editors and operating systems
 .vscode/
 .idea/
 .DS_Store
 Thumbs.db
+Desktop.ini

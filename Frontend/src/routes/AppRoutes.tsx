@@ -1,30 +1,26 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-
-import Layout from "../Components/Layout/Layout"
-
-import Dashboard from "../Pages/Dashboard";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import Layout from "../Components/Layout/Layout";
 import Chat from "../Pages/Chat";
-import Configurações from "../Pages/Settings";
+import Dashboard from "../Pages/Dashboard";
 import Documentos from "../Pages/Documentos";
 import Relatorio from "../Pages/Relatorio";
+import SettingsPage from "../Pages/Settings";
 
 function AppRoutes() {
-    return(
-        <BrowserRouter>
-            <Routes>
-                <Route element={<Layout />}>
-
-                    <Route path="/" element={<Dashboard />}></Route>
-                    <Route path="/chat" element={<Chat />}></Route>
-                    <Route path="/chat/:id" element={<Chat />} />
-                    <Route path="/documents" element={<Documentos />}></Route>
-                    <Route path="/settings" element={<Configurações />}></Route>
-                    <Route path="/relatorio" element={<Relatorio />}></Route>
-
-                </Route>
-            </Routes>
-        </BrowserRouter>
-    );
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route element={<Layout />}>
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/chat" element={<Chat />} />
+          <Route path="/chat/:id" element={<Chat />} />
+          <Route path="/documents" element={<Documentos />} />
+          <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/relatorio" element={<Relatorio />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
+  );
 }
 
-export default AppRoutes
+export default AppRoutes;

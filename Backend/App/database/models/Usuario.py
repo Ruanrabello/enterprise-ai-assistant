@@ -1,24 +1,32 @@
-from sqlalchemy import Column, Integer, String
-from sqlalchemy.orm import relationship
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+from sqlalchemy import String
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from database.database import Base
+
+if TYPE_CHECKING:
+    from database.models.Conversa import Conversa
+    from database.models.configuracao_ia import ConfiguracaoIA
 
 
 class Usuario(Base):
     __tablename__ = "usuarios"
 
-    id = Column(Integer, primary_key=True, index=True)
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
 
-    nome = Column(String, nullable=False)
+    nome: Mapped[str] = mapped_column(String, nullable=False)
 
-    email = Column(String, unique=True, nullable=False)
+    email: Mapped[str] = mapped_column(String, unique=True, nullable=False)
 
-    conversas = relationship(
+    conversas: Mapped[list[Conversa]] = relationship(
         "Conversa",
         back_populates="usuario"
     )
 
-    configuracao_ia = relationship(
+    configuracao_ia: Mapped[ConfiguracaoIA | None] = relationship(
         "ConfiguracaoIA",
         back_populates="usuario",
         uselist=False

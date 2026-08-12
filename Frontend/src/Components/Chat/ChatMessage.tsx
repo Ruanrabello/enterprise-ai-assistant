@@ -1,113 +1,88 @@
-/* Esse componente representa uma mensagem. */
-import { Bot } from "lucide-react";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
+import { Bot, ExternalLink, Globe2 } from "lucide-react";
+import { lazy, Suspense } from "react";
+import type { WebSource } from "../../types/chat";
 
-type MensagemChatPropriedades = {
-    texto: string;
-    usuario: "user" | "ai";
-    modelo?: string | null;
+const MarkdownContent = lazy(() => import("./MarkdownContent"));
+
+type MensagemChatProps = {
+  texto: string;
+  usuario: "user" | "ai";
+  modelo?: string | null;
+  fontes?: WebSource[];
+  pesquisaWebUsada?: boolean;
 };
 
-function MensagemChat({texto, usuario, modelo}: MensagemChatPropriedades) {
-
-    const isUser = usuario === "user";
-
-    if (isUser) {
-        return (
-            <div className="flex justify-end">
-                <div className="
-                    max-w-[70%]
-                    rounded-xl
-                    px-4
-                    py-3
-                    bg-cyan-500
-                    text-white
-                ">
-                    {texto}
-                </div>
-            </div>
-        );
-    }
-
+function MensagemChat({
+  texto,
+  usuario,
+  modelo,
+  fontes = [],
+  pesquisaWebUsada = false,
+}: MensagemChatProps) {
+  if (usuario === "user") {
     return (
-        <div className="flex gap-3 items-start">
-            <div className="
-                h-8
-                w-8
-                shrink-0
-                rounded-full
-                bg-slate-700
-                flex
-                items-center
-                justify-center
-            ">
-                <Bot size={18} className="text-cyan-400" />
-            </div>
-
-            <div className="
-                max-w-[70%]
-                text-slate-200
-                leading-relaxed
-                pt-1
-                [&_p]:mb-3
-                [&_p:last-child]:mb-0
-                [&_ul]:list-disc
-                [&_ul]:pl-5
-                [&_ul]:mb-3
-                [&_ul]:space-y-1
-                [&_ol]:list-decimal
-                [&_ol]:pl-5
-                [&_ol]:mb-3
-                [&_ol]:space-y-1
-                [&_li]:pl-1
-                [&_h1]:text-xl
-                [&_h1]:font-bold
-                [&_h1]:mt-4
-                [&_h1]:mb-2
-                [&_h2]:text-lg
-                [&_h2]:font-bold
-                [&_h2]:mt-4
-                [&_h2]:mb-2
-                [&_h3]:text-base
-                [&_h3]:font-semibold
-                [&_h3]:mt-3
-                [&_h3]:mb-2
-                [&_strong]:font-semibold
-                [&_strong]:text-white
-                [&_em]:italic
-                [&_hr]:border-slate-700
-                [&_hr]:my-4
-                [&_code]:bg-slate-800
-                [&_code]:px-1.5
-                [&_code]:py-0.5
-                [&_code]:rounded
-                [&_code]:text-sm
-                [&_code]:text-cyan-300
-                [&_table]:w-full
-                [&_table]:my-3
-                [&_table]:border-collapse
-                [&_th]:border
-                [&_th]:border-slate-700
-                [&_th]:bg-slate-800
-                [&_th]:px-3
-                [&_th]:py-2
-                [&_th]:text-left
-                [&_td]:border
-                [&_td]:border-slate-700
-                [&_td]:px-3
-                [&_td]:py-2
-            ">
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>{texto}</ReactMarkdown>
-
-                {modelo && (
-                    <p className="text-xs text-slate-500 mt-2">
-                        {modelo}
-                    </p>
-                )}
-            </div>
+      <div className="flex justify-end">
+        <div className="max-w-[70%] whitespace-pre-wrap rounded-2xl bg-cyan-500 px-4 py-3 text-white shadow-sm">
+          {texto}
         </div>
+      </div>
     );
+  }
+
+  return (
+    <div className="flex items-start gap-3">
+      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-700">
+        <Bot size={18} className="text-cyan-400" />
+      </div>
+
+      <div className="min-w-0 max-w-[85%] rounded-2xl border border-slate-800 bg-slate-900 px-4 py-3 sm:max-w-[80%]">
+        {pesquisaWebUsada && (
+          <div className="mb-3 flex items-center gap-1.5 text-xs text-cyan-400">
+            <Globe2 size={14} />
+            <span>Resposta com pesquisa na web</span>
+          </div>
+        )}
+
+        <Suspense
+          fallback={<div className="whitespace-pre-wrap text-slate-200">{texto}</div>}
+        >
+          <MarkdownContent>{texto}</MarkdownContent>
+        </Suspense>
+
+        {fontes.length > 0 && (
+          <div className="mt-4 border-t border-slate-800 pt-3">
+            <p className="mb-2 text-xs font-medium uppercase tracking-wide text-slate-500">
+              Fontes
+            </p>
+
+            <div className="flex flex-wrap gap-2">
+              {fontes.map((fonte, index) => (
+                <a
+                  key={`${fonte.url}-${index}`}
+                  href={fonte.url}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  className="flex max-w-full items-center gap-1.5 rounded-lg border border-slate-700 bg-slate-950 px-2.5 py-1.5 text-xs text-slate-300 transition hover:border-cyan-500 hover:text-cyan-300"
+                  title={fonte.url}
+                >
+                  <span className="max-w-56 truncate">
+                    {index + 1}. {fonte.titulo || "Fonte"}
+                  </span>
+                  <ExternalLink size={12} className="shrink-0" />
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {modelo && (
+          <p className="mt-2 text-xs text-slate-500">
+            {modelo}
+          </p>
+        )}
+      </div>
+    </div>
+  );
 }
 
-export default MensagemChat
+export default MensagemChat;
