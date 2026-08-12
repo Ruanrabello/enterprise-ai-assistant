@@ -2,8 +2,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from config import FRONTEND_ORIGINS
-from core.bootstrap import ensure_default_user
-from database.database import Base, SessionLocal, engine
+from core.bootstrap import ensure_auth_schema
+from database.database import Base, engine
 from database.models.Conversa import Conversa
 from database.models.Documentos import Documento
 from database.models.Mensagem import Mensagem
@@ -22,9 +22,7 @@ app.add_middleware(
 )
 
 Base.metadata.create_all(bind=engine)
-
-with SessionLocal() as db:
-  ensure_default_user(db)
+ensure_auth_schema(engine)
 
 app.include_router(chat.router)
 app.include_router(documentos.router)

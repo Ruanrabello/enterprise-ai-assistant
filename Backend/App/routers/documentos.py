@@ -1,4 +1,7 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
+
+from core.auth import get_current_user
+from database.models.Usuario import Usuario
 
 
 router = APIRouter(
@@ -8,7 +11,7 @@ router = APIRouter(
 
 
 @router.get("/")
-def listar_documentos():
+def listar_documentos(_usuario: Usuario = Depends(get_current_user)):
 
     return {
         "message": "Router documentos funcionando"

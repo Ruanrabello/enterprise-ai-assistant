@@ -1,22 +1,23 @@
-from sqlalchemy.orm import Session
-from core.constants import CURRENT_USER_ID, DEFAULT_USER_EMAIL, DEFAULT_USER_NAME
-from database.models.Usuario import Usuario
+from sqlalchemy import inspect, text
+from sqlalchemy.engine import Engine
 
 
-def ensure_default_user(db: Session) -> Usuario:
-  usuario = db.query(Usuario).filter(Usuario.id == CURRENT_USER_ID).first()
+def ensure_auth_schema(engine: Engine) -> None:
+  """Adiciona a identidade do Supabase sem apagar os dados locais existentes."""
+  inspector = inspect(engine)
 
-  if usuario:
-    return usuario
+  if "usuarios" not in inspector.get_table_names():
+    return
 
-  usuario = Usuario(
-    id=CURRENT_USER_ID,
-    nome=DEFAULT_USER_NAME,
-    email=DEFAULT_USER_EMAIL,
-  )
+  columns = {column["name"] for column in inspector.get_columns("usuarios")}
 
-  db.add(usuario)
-  db.commit()
-  db.refresh(usuario)
+  with engine.begin() as connection:
+    if "supabase_id" not in columns:
+      connection.execute(text("ALTER TABLE usuarios ADD COLUMN supabase_id VARCHAR"))
 
-  return usuario
+    connection.execute(
+      text(
+        "CREATE UNIQUE INDEX IF NOT EXISTS ix_usuarios_supabase_id "
+        "ON usuarios (supabase_id)"
+      )
+    )

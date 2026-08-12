@@ -147,6 +147,30 @@ function SettingsPage() {
         const backendDetail = error.response?.data?.detail;
 
         if (typeof backendDetail === "string" && backendDetail.trim()) {
+          const normalizedDetail = backendDetail.toLowerCase();
+
+          if (
+            provider === "ollama" &&
+            (normalizedDetail.includes("10061") ||
+              normalizedDetail.includes("connection refused") ||
+              normalizedDetail.includes("actively refused"))
+          ) {
+            setMensagemTeste(
+              "O Ollama parece estar desligado. Abra o aplicativo Ollama e tente novamente.",
+            );
+            return;
+          }
+
+          if (
+            provider === "ollama" &&
+            (normalizedDetail.includes("model") && normalizedDetail.includes("not found"))
+          ) {
+            setMensagemTeste(
+              "O Ollama está aberto, mas esse modelo não foi encontrado no computador.",
+            );
+            return;
+          }
+
           setMensagemTeste(backendDetail);
           return;
         }
@@ -313,13 +337,33 @@ function SettingsPage() {
         </div>
 
         {mensagemTeste && (
-          <p
-            className={`mt-3 text-sm ${
-              statusTeste === "success" ? "text-green-400" : "text-red-400"
-            }`}
-          >
-            {mensagemTeste}
-          </p>
+          <div className="mt-3 flex flex-wrap items-center gap-3">
+            <p
+              className={`text-sm ${
+                statusTeste === "success" ? "text-green-400" : "text-red-400"
+              }`}
+            >
+              {mensagemTeste}
+            </p>
+
+            {statusTeste === "error" ? (
+              <button
+                type="button"
+                onClick={() => {
+                  window.dispatchEvent(
+                    new CustomEvent("abrir-central-ajuda", {
+                      detail: {
+                        query: provider === "ollama" ? "Ollama" : "chave de API",
+                      },
+                    }),
+                  );
+                }}
+                className="rounded-lg border border-red-400/20 bg-red-400/5 px-3 py-1.5 text-xs font-medium text-red-200 transition hover:bg-red-400/10"
+              >
+                Ver como resolver
+              </button>
+            ) : null}
+          </div>
         )}
 
         {mensagemSalvamento && (

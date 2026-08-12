@@ -1,8 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from core.bootstrap import ensure_default_user
-from core.constants import CURRENT_USER_ID
+from core.auth import get_current_user
 from database.database import get_db
 from database.models.Usuario import Usuario
 from database.models.configuracao_ia import ConfiguracaoIA
@@ -30,19 +29,17 @@ def serializar_configuracao(configuracao: ConfiguracaoIA) -> dict[str, object]:
   }
 
 
-def obter_usuario_atual(db: Session) -> Usuario:
-  usuario = db.query(Usuario).filter(Usuario.id == CURRENT_USER_ID).first()
-  return usuario or ensure_default_user(db)
-
-
 @router.get("/perfil", response_model=PerfilResponse)
-def buscar_perfil(db: Session = Depends(get_db)):
-  return obter_usuario_atual(db)
+def buscar_perfil(usuario: Usuario = Depends(get_current_user)):
+  return usuario
 
 
 @router.put("/perfil", response_model=PerfilResponse)
-def atualizar_perfil(dados: PerfilUpdate, db: Session = Depends(get_db)):
-  usuario = obter_usuario_atual(db)
+def atualizar_perfil(
+  dados: PerfilUpdate,
+  db: Session = Depends(get_db),
+  usuario: Usuario = Depends(get_current_user),
+):
   usuario.nome = dados.nome
 
   db.commit()
@@ -52,22 +49,25 @@ def atualizar_perfil(dados: PerfilUpdate, db: Session = Depends(get_db)):
 
 
 @router.get("/ia", response_model=ConfiguracaoIAResponse | None)
-def buscar_configuracao_ia(db: Session = Depends(get_db)):
-  obter_usuario_atual(db)
-
+def buscar_configuracao_ia(
+  db: Session = Depends(get_db),
+  usuario: Usuario = Depends(get_current_user),
+):
   configuracao = db.query(ConfiguracaoIA).filter(
-    ConfiguracaoIA.usuario_id == CURRENT_USER_ID
+    ConfiguracaoIA.usuario_id == usuario.id
   ).first()
 
   return serializar_configuracao(configuracao) if configuracao else None
 
 
 @router.put("/ia", response_model=ConfiguracaoIAResponse)
-def atualizar_configuracao_ia(dados: ConfiguracaoIAUpdate, db: Session = Depends(get_db)):
-  obter_usuario_atual(db)
-
+def atualizar_configuracao_ia(
+  dados: ConfiguracaoIAUpdate,
+  db: Session = Depends(get_db),
+  usuario: Usuario = Depends(get_current_user),
+):
   configuracao = db.query(ConfiguracaoIA).filter(
-    ConfiguracaoIA.usuario_id == CURRENT_USER_ID
+    ConfiguracaoIA.usuario_id == usuario.id
   ).first()
 
   if configuracao:
@@ -82,7 +82,7 @@ def atualizar_configuracao_ia(dados: ConfiguracaoIAUpdate, db: Session = Depends
       configuracao.api_key = None
   else:
     configuracao = ConfiguracaoIA(
-      usuario_id=CURRENT_USER_ID,
+      usuario_id=usuario.id,
       provider=dados.provider,
       modelo=dados.modelo,
       api_key=dados.api_key,
@@ -97,15 +97,17 @@ def atualizar_configuracao_ia(dados: ConfiguracaoIAUpdate, db: Session = Depends
 
 
 @router.post("/ia/testar")
-def testar_conexao_ia(dados: ConfiguracaoIAUpdate, db: Session = Depends(get_db)):
-  obter_usuario_atual(db)
-
+def testar_conexao_ia(
+  dados: ConfiguracaoIAUpdate,
+  db: Session = Depends(get_db),
+  usuario: Usuario = Depends(get_current_user),
+):
   try:
     configuracao_teste = dados
 
     if not dados.api_key and dados.provider != "ollama":
       configuracao_salva = db.query(ConfiguracaoIA).filter(
-        ConfiguracaoIA.usuario_id == CURRENT_USER_ID,
+        ConfiguracaoIA.usuario_id == usuario.id,
         ConfiguracaoIA.provider == dados.provider,
       ).first()
 

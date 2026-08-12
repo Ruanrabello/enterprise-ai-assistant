@@ -21,6 +21,13 @@ class Usuario(Base):
 
     email: Mapped[str] = mapped_column(String, unique=True, nullable=False)
 
+    supabase_id: Mapped[str | None] = mapped_column(
+        String,
+        unique=True,
+        index=True,
+        nullable=True,
+    )
+
     conversas: Mapped[list[Conversa]] = relationship(
         "Conversa",
         back_populates="usuario"

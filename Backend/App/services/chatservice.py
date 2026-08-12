@@ -1,7 +1,6 @@
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
-from core.constants import CURRENT_USER_ID
 from database.models.Conversa import Conversa
 from database.models.Mensagem import Mensagem
 from database.models.configuracao_ia import ConfiguracaoIA
@@ -37,7 +36,15 @@ def listar_conversas(db: Session, usuario_id: int):
   )
 
 
-def listar_mensagens(db: Session, conversa_id: int):
+def listar_mensagens(db: Session, conversa_id: int, usuario_id: int):
+  conversa = db.query(Conversa).filter(
+    Conversa.id == conversa_id,
+    Conversa.usuario_id == usuario_id,
+  ).first()
+
+  if not conversa:
+    raise HTTPException(status_code=404, detail="Conversa não encontrada.")
+
   return (
     db.query(Mensagem)
     .filter(Mensagem.conversa_id == conversa_id)
@@ -51,9 +58,13 @@ def criar_mensagem(
   conversa_id: int,
   usuario: str,
   texto: str,
+  usuario_id: int,
   pesquisa_web: WebSearchMode = "auto",
 ):
-  conversa = db.query(Conversa).filter(Conversa.id == conversa_id).first()
+  conversa = db.query(Conversa).filter(
+    Conversa.id == conversa_id,
+    Conversa.usuario_id == usuario_id,
+  ).first()
 
   if not conversa:
     raise HTTPException(status_code=404, detail="Conversa não encontrada.")
@@ -75,7 +86,7 @@ def criar_mensagem(
   db.refresh(mensagem_usuario)
 
   configuracao = db.query(ConfiguracaoIA).filter(
-    ConfiguracaoIA.usuario_id == CURRENT_USER_ID
+    ConfiguracaoIA.usuario_id == usuario_id
   ).first()
 
   if not configuracao:

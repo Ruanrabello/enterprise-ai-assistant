@@ -17,6 +17,13 @@ for env_file in ENV_FILES:
     load_dotenv(dotenv_path=env_file, override=False)
 
 DATABASE_URL = os.getenv("DATABASE_URL")
+SUPABASE_URL = os.getenv("SUPABASE_URL") or os.getenv("VITE_SUPABASE_URL")
+SUPABASE_PUBLISHABLE_KEY = (
+  os.getenv("SUPABASE_PUBLISHABLE_KEY")
+  or os.getenv("SUPABASE_KEY")
+  or os.getenv("VITE_SUPABASE_PUBLISHABLE_KEY")
+  or os.getenv("VITE_SUPABASE_KEY")
+)
 
 if not DATABASE_URL:
   raise RuntimeError("DATABASE_URL não foi encontrada em nenhum arquivo de ambiente.")

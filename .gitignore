@@ -43,6 +43,7 @@ coverage/
 *.temp
 *.swp
 *.swo
+help-center-*-preview*.png
 
 # Editors and operating systems
 .vscode/

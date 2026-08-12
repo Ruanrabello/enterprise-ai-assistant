@@ -4,11 +4,13 @@ import {
   ChevronRight,
   FileText,
   LayoutDashboard,
+  LogOut,
   MessageSquare,
   Settings,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
+import { useAuth } from "../../Auth/auth-context";
 import api from "../../Services/api";
 import type { ProfileResponse } from "../../types/settings";
 import ConversasRecentes from "./RecentActivities";
@@ -43,8 +45,15 @@ const NAVIGATION_ITEMS = [
 
 function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const navigate = useNavigate();
-  const [profileName, setProfileName] = useState("Usuário");
+  const { signOut, user } = useAuth();
+  const metadataName = user?.user_metadata.nome;
+  const authenticatedName =
+    typeof metadataName === "string" ? metadataName.trim() : "";
+  const [profileName, setProfileName] = useState(
+    () => authenticatedName || user?.email?.split("@")[0] || "Usuário",
+  );
   const [isCreatingConversation, setIsCreatingConversation] = useState(false);
+  const [isSigningOut, setIsSigningOut] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -92,6 +101,19 @@ function Sidebar({ collapsed, onToggle }: SidebarProps) {
       console.error("Erro ao criar conversa", error);
     } finally {
       setIsCreatingConversation(false);
+    }
+  }
+
+  async function handleSignOut() {
+    setIsSigningOut(true);
+
+    try {
+      await signOut();
+      navigate("/login", { replace: true });
+    } catch (error) {
+      console.error("Não foi possível sair da conta:", error);
+    } finally {
+      setIsSigningOut(false);
     }
   }
 
@@ -193,18 +215,29 @@ function Sidebar({ collapsed, onToggle }: SidebarProps) {
         )}
       </div>
 
-      <div className="border-t border-slate-800 p-6">
+      <div className="border-t border-slate-800 p-4">
         <div className="flex items-center gap-3">
           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-cyan-500 font-bold">
             {profileInitial}
           </div>
 
           {!collapsed && (
-            <div>
+            <div className="min-w-0 flex-1">
               <p className="text-sm font-medium text-white">{profileName}</p>
-              <p className="text-xs text-slate-400">Plano Free</p>
+              <p className="truncate text-xs text-slate-400">{user?.email}</p>
             </div>
           )}
+
+          <button
+            type="button"
+            onClick={handleSignOut}
+            disabled={isSigningOut}
+            className="rounded-lg p-2 text-slate-400 transition hover:bg-slate-800 hover:text-red-300 disabled:opacity-50"
+            aria-label="Sair da conta"
+            title="Sair da conta"
+          >
+            <LogOut size={17} />
+          </button>
         </div>
       </div>
     </aside>
